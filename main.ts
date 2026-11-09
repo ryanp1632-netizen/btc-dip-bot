@@ -45,7 +45,12 @@ await runBars({
     const held = state.positions.get(symbol);
     const minNotional = BigInt(state.hello.fees.min_notional_quote_units);
 
-    // Participation probe: a tiny buy first, sold right after.
+    // Participation probe: a tiny buy first, sold right after. If the probe buy was rejected
+    // (no fill reported, nothing held), send it again on the next bar so the race guardrail of
+    // at least one own trade is still met.
+    if (probeState === 'bought' && held === undefined && !batch.fills.some((f) => f.status !== 'rejected')) {
+      probeState = 'none';
+    }
     if (probeState === 'none') {
       probeState = 'bought';
       const notional = PROBE_QUOTE > minNotional ? PROBE_QUOTE : minNotional;
@@ -53,9 +58,7 @@ await runBars({
     }
     if (probeState === 'bought') {
       probeState = 'done';
-      if (held !== undefined) {
-        return [{ side: 'sell', symbol, qty: held.qty, max_slippage_bps: MAX_SLIPPAGE_BPS } satisfies SellInput];
-      }
+      return [{ side: 'sell', symbol, qty: held!.qty, max_slippage_bps: MAX_SLIPPAGE_BPS } satisfies SellInput];
     }
 
     if (bars < WARM_BARS) return [];
