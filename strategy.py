@@ -2,19 +2,20 @@
 
 LAMPORTS = 1_000_000_000
 
+# Tuned on the dev window with tools/sim.py (each batch is one slot; orders fill two slots later).
 P = {
-    'max_age': 300,          # slots after create during which a coin may first qualify
-    'min_rsol': 60 * LAMPORTS,
-    'min_buyers': 30,
-    'target': 1_000_000_000,  # lamports to put into one coin
-    'stop_drop': 1000 * LAMPORTS,  # sell when real SOL falls this far under its peak since entry
-    'trail': 0.3,          # or under (1 - trail) of that peak
-    'floor': 0.75,           # or under this share of the real SOL at entry
-    'max_hold': 1500,       # slots
-    'ticket': 12_000_000,   # small round trip to meet the 20-coin bar
-    'ticket_hold': 4,
-    'tickets_wanted': 24,
-    'slip': 3000,
+    'max_age': 300,                # slots after the CreateEvent during which a coin may first qualify
+    'min_rsol': 60 * LAMPORTS,     # real SOL reserve needed to qualify (the curve completes near 85 SOL)
+    'min_buyers': 30,              # distinct buying wallets needed to qualify
+    'target': 1_000_000_000,       # lamports to put into one coin, in slices under the 1% size cap
+    'stop_drop': 1000 * LAMPORTS,  # absolute stop under the peak (disabled: the trail below rules)
+    'trail': 0.3,                  # sell when real SOL falls under (1 - trail) of its peak since entry
+    'floor': 0.75,                 # or under this share of the real SOL at entry
+    'max_hold': 1500,              # slots to wait for completion before giving up
+    'ticket': 12_000_000,          # one small round trip toward the 20-coin bar (0.012 SOL)
+    'ticket_hold': 4,              # slots a ticket is held before it is sold
+    'tickets_wanted': 24,          # 20 needed; 4 spare for the 2% of orders that fail on chain
+    'slip': 3000,                  # max_slippage_bps on buys; sells are left wide open
 }
 
 

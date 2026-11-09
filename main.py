@@ -18,6 +18,7 @@ strategy = Strategy()
 
 
 def on_batch(state, batch):
+    """Answer one batch (one slot of universe events) with this slot's orders."""
     caps = state.hello["caps"]
     curves = state.curves
 
